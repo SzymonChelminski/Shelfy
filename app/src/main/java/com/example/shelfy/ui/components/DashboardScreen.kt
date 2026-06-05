@@ -58,6 +58,20 @@ fun DashboardScreen(
             },
             onSeeAllClick = { },
         ) {
+            val totalItems = FoodItem.mockFoodList.size
+
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                FoodItem.mockFoodList.take(3).forEach { foodItem ->
+                    FoodListCard(item = foodItem)
+                }
+
+                if (totalItems > 3) {
+                    SeeAllProductsCard(
+                        totalCount = totalItems,
+                        onClick = { }
+                    )
+                }
+            }
         }
     }
 }
