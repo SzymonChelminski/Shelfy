@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.example.shelfy.ui.MainLayout
+import com.example.shelfy.ui.components.DashboardScreen
 import com.example.shelfy.ui.theme.ShelfyTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ShelfyTheme {
-                MainLayout {}
+                MainLayout {
+                    DashboardScreen()
+                }
             }
         }
     }

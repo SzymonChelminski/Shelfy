@@ -19,9 +19,14 @@ fun MainLayout(
     Scaffold(
         topBar = { ShelfyTopBar() },
         bottomBar = { ShelfyNavigationBar() },
-        floatingActionButton = { ShelfyFAB(
-            modifier = Modifier.padding(bottom = 8.dp).size(72.dp)
-        ) }
+
+        floatingActionButton = {
+            ShelfyFAB(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .size(72.dp)
+            )
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             content()
