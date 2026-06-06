@@ -22,7 +22,8 @@ import com.example.shelfy.ui.theme.Text
 
 @Composable
 fun DashboardScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onFabClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier

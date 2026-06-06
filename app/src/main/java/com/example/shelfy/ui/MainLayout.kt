@@ -14,19 +14,13 @@ import com.example.shelfy.ui.components.ShelfyTopBar
 
 @Composable
 fun MainLayout(
+    fab: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Scaffold(
         topBar = { ShelfyTopBar() },
         bottomBar = { ShelfyNavigationBar() },
-
-        floatingActionButton = {
-            ShelfyFAB(
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .size(72.dp)
-            )
-        }
+        floatingActionButton = fab
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             content()

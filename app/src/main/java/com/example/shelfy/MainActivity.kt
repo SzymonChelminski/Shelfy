@@ -3,8 +3,7 @@ package com.example.shelfy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.shelfy.ui.MainLayout
-import com.example.shelfy.ui.components.DashboardScreen
+import com.example.shelfy.ui.AppNavigation
 import com.example.shelfy.ui.theme.ShelfyTheme
 
 class MainActivity : ComponentActivity() {
@@ -12,9 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ShelfyTheme {
-                MainLayout {
-                    DashboardScreen()
-                }
+                AppNavigation();
             }
         }
     }
