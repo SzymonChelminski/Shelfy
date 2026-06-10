@@ -1,5 +1,8 @@
 package com.example.shelfy.ui
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,11 +28,16 @@ fun AppNavigation() {
                 DashboardScreen(onFabClick = { navController.navigate(Routes.ADD_PRODUCT) })
             }
         }
-        composable(Routes.ADD_PRODUCT) {
+        composable(
+            route = Routes.ADD_PRODUCT,
+            enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
+            exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
+            popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
+            popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
+        ) {
             AddProductScreen(
                 onBack = { navController.popBackStack() }
             )
         }
     }
 }
-
