@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +24,7 @@ import androidx.compose.material3.Icon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShelfyTopBar() {
+fun ShelfyTopBar(onSettingsClick: () -> Unit = {}) {
     TopAppBar(
         title = {
             Row(
@@ -52,7 +53,8 @@ fun ShelfyTopBar() {
                     tint = Text,
                     modifier = Modifier
                         .padding(horizontal = 32.dp)
-                        .size(32.dp),
+                        .size(32.dp)
+                        .clickable { onSettingsClick() },
                 )
             }
         },

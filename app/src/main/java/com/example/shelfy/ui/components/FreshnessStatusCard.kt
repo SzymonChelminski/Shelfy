@@ -20,6 +20,7 @@ import com.example.shelfy.model.FoodItem
 fun FreshnessStatusCard(item: FoodItem) {
     val progress = item.getFreshnessProgress()
     val status = item.getFreshnessStatus()
+    val isExpired = item.daysLeft <= 0
     val progressColor = when (status) {
         "Expired" -> Color(0xFFDC2626)
         "Eat immediately" -> Color(0xFFF59E0B)
@@ -51,30 +52,35 @@ fun FreshnessStatusCard(item: FoodItem) {
                     Text(
                         text = status,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF111827),
+                        color = if (isExpired) progressColor else Color(0xFF111827),
                         fontSize = 16.sp
                     )
                 }
-                Text(
-                    text = "${(progress * 100).toInt()}% left",
-                    color = Color(0xFF6B7280),
-                    fontSize = 14.sp
-                )
+                if (!isExpired) {
+                    Text(
+                        text = "${(progress * 100).toInt()}% left",
+                        color = Color(0xFF6B7280),
+                        fontSize = 14.sp
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(12.dp))
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .background(Color(0xFFE5E7EB), RoundedCornerShape(50))
-            ) {
+            if (!isExpired) {
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(fraction = progress)
-                        .fillMaxHeight()
-                        .background(progressColor, RoundedCornerShape(50))
-                )
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(Color(0xFFE5E7EB), RoundedCornerShape(50))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(fraction = progress)
+                            .fillMaxHeight()
+                            .background(progressColor, RoundedCornerShape(50))
+                    )
+                }
             }
         }
     }

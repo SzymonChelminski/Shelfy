@@ -23,9 +23,14 @@ import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Error
 
 @Composable
-fun FoodItemCard(item: FoodItem) {
+fun FoodItemCard(
+    item: FoodItem,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
-        modifier = Modifier
+        onClick = onClick,
+        modifier = modifier
             .width(200.dp)
             .padding(8.dp),
         shape = RoundedCornerShape(8.dp),

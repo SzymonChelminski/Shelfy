@@ -16,7 +16,7 @@ fun MainLayout(
     content: @Composable () -> Unit
 ) {
     Scaffold(
-        topBar = { ShelfyTopBar() },
+        topBar = { ShelfyTopBar(onSettingsClick = { navController.navigate(Routes.SETTINGS) }) },
         bottomBar = { ShelfyNavigationBar(navController = navController) },
         floatingActionButton = fab
     ) { paddingValues ->
