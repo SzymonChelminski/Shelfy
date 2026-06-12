@@ -41,10 +41,12 @@ import com.example.shelfy.ui.theme.Text as ThemeText
 @Composable
 fun FoodListCard(
     item: FoodItem,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val progress = item.getFreshnessProgress()
     val statusText = item.getFreshnessStatus()
+    val isExpired = item.daysLeft <= 0
 
     val progressColor = when {
         item.daysLeft <= 0 -> Error
@@ -62,6 +64,7 @@ fun FoodListCard(
     val expirationColor = if (item.daysLeft <= 0) Error else ThemeText.copy(alpha = 0.5f)
 
     Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth().padding(vertical = 6.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Surface),
@@ -107,28 +110,37 @@ fun FoodListCard(
             }
 
             Column(horizontalAlignment = Alignment.End) {
-                Box(
-                    modifier = Modifier
-                        .width(80.dp)
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Primary.copy(alpha = 0.15f))
-                ) {
+                if (isExpired) {
+                    Text(
+                        text = "Expired",
+                        color = Error,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                } else {
                     Box(
                         modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(fraction = progress)
+                            .width(80.dp)
+                            .height(6.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(progressColor)
+                            .background(Primary.copy(alpha = 0.15f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(fraction = progress)
+                                .clip(RoundedCornerShape(50))
+                                .background(progressColor)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = statusText,
+                        color = progressColor,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = statusText,
-                    color = progressColor,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold
-                )
             }
         }
     }

@@ -11,21 +11,41 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.shelfy.model.FoodItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Icon
 import com.example.shelfy.ui.theme.Primary
 import com.example.shelfy.ui.theme.Text
 
+private enum class RipenessSort(val label: String) {
+    MOST_RIPE("Most ripe"),
+    LEAST_RIPE("Least ripe");
+
+    fun toggled(): RipenessSort = if (this == MOST_RIPE) LEAST_RIPE else MOST_RIPE
+}
+
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    onProductClick: () -> Unit,
+    onProductClick: (Int) -> Unit,
+    onSeeAllProducts: () -> Unit,
     onFabClick: () -> Unit = {}
 ) {
+    var sortOrder by remember { mutableStateOf(RipenessSort.MOST_RIPE) }
+
+    val eatSoonItems = FoodItem.mockFoodList.sortedBy { it.daysLeft }
+    val sortedItems = when (sortOrder) {
+        RipenessSort.MOST_RIPE -> FoodItem.mockFoodList.sortedBy { it.daysLeft }
+        RipenessSort.LEAST_RIPE -> FoodItem.mockFoodList.sortedByDescending { it.daysLeft }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,11 +56,14 @@ fun DashboardScreen(
             title = "Eat soon",
             buttonText = "See all",
             buttonTextColor = Primary,
-            onSeeAllClick = { }
+            onSeeAllClick = onSeeAllProducts
         ) {
             LazyRow {
-                items(FoodItem.mockFoodList) { foodItem ->
-                    FoodItemCard(item = foodItem)
+                items(eatSoonItems) { foodItem ->
+                    FoodItemCard(
+                        item = foodItem,
+                        onClick = { onProductClick(foodItem.id) }
+                    )
                 }
             }
         }
@@ -49,28 +72,31 @@ fun DashboardScreen(
 
         DashboardSection(
             title = "Recently added",
-            buttonText = "Filter",
+            buttonText = sortOrder.label,
             buttonTextColor = Text,
             icon = {
                 Icon(
-                    Icons.Filled.FilterList,
+                    Icons.Filled.SwapVert,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
             },
-            onSeeAllClick = { },
+            onSeeAllClick = { sortOrder = sortOrder.toggled() },
         ) {
-            val totalItems = FoodItem.mockFoodList.size
+            val totalItems = sortedItems.size
 
             Column(modifier = Modifier.padding(top = 8.dp)) {
-                FoodItem.mockFoodList.take(3).forEach { foodItem ->
-                    FoodListCard(item = foodItem)
+                sortedItems.take(3).forEach { foodItem ->
+                    FoodListCard(
+                        item = foodItem,
+                        onClick = { onProductClick(foodItem.id) }
+                    )
                 }
 
                 if (totalItems > 3) {
                     SeeAllProductsCard(
                         totalCount = totalItems,
-                        onClick = { }
+                        onClick = onSeeAllProducts
                     )
                 }
             }

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ fun ProductDetailsScreen(
     onConsume: () -> Unit,
     onThrowAway: () -> Unit,
     onEdit: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -27,7 +29,17 @@ fun ProductDetailsScreen(
             .background(Color.White)
             .verticalScroll(rememberScrollState())
     ) {
-        ProductHeader(item = item)
+        Box {
+            ProductHeader(item = item)
+            BackButton(
+                onClick = onBack,
+                tint = Color.White,
+                backgroundColor = Color.Black.copy(alpha = 0.35f),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+            )
+        }
 
         Column(
             modifier = Modifier
