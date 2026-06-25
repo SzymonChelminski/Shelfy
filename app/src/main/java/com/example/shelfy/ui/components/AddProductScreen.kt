@@ -11,23 +11,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.shelfy.data.remote.dto.OpenFoodProductDto
 import com.example.shelfy.data.repository.ProductRepository
+import com.example.shelfy.model.PendingProduct
 import com.example.shelfy.ui.theme.Background
 import com.example.shelfy.ui.theme.Text as TextColor
 
 @Composable
-fun AddProductScreen(onBack: () -> Unit) {
+fun AddProductScreen(
+    onBack: () -> Unit,
+    onProductScanned: (PendingProduct) -> Unit
+) {
     var scannedBarcode by remember { mutableStateOf("") }
+    var fetchedProduct by remember { mutableStateOf<OpenFoodProductDto?>(null) }
 
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode.isNotEmpty()) {
-            Log.d("BARCODE_SCAN", "Fetching product for: $scannedBarcode")
-            val product = ProductRepository.getProduct(scannedBarcode)
-            if (product != null) {
-                Log.d("BARCODE_SCAN", "Product: $product")
-            } else {
-                Log.d("BARCODE_SCAN", "Not found for: $scannedBarcode")
-            }
+            Log.d("BARCODE_SCAN", "Fetching: $scannedBarcode")
+            fetchedProduct = ProductRepository.getProduct(scannedBarcode)
+            Log.d("BARCODE_SCAN", "Result: $fetchedProduct")
         }
     }
 
@@ -63,13 +65,23 @@ fun AddProductScreen(onBack: () -> Unit) {
         ) {
             CameraPermissionWrapper(
                 onBarcodeScanned = { barcode ->
-                    if (scannedBarcode.isEmpty()) {
-                        scannedBarcode = barcode
-                    }
+                    if (scannedBarcode.isEmpty()) scannedBarcode = barcode
                 }
             )
             if (scannedBarcode.isNotEmpty()) {
-                ScanSuccessOverlay(onAnimationComplete = onBack)
+                ScanSuccessOverlay(
+                    onAnimationComplete = {
+                        onProductScanned(
+                            PendingProduct(
+                                barcode = scannedBarcode,
+                                name = fetchedProduct?.productName,
+                                brand = fetchedProduct?.brands,
+                                imageUrl = fetchedProduct?.imageUrl,
+                                nutriscoreGrade = fetchedProduct?.nutriscoreGrade
+                            )
+                        )
+                    }
+                )
             }
         }
 
