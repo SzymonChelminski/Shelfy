@@ -1,7 +1,5 @@
 package com.example.shelfy.ui.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Error
 
@@ -37,16 +35,15 @@ fun FoodItemCard(
         colors = cardColors(containerColor = Color.White)
     ) {
         Column {
-            Box {
-                Image(
-                    painter = painterResource(id = item.imageResourceId),
+            androidx.compose.foundation.layout.Box {
+                AsyncImage(
+                    model = item.imageUrl,
                     contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp),
-                    contentScale = ContentScale.Crop
+                        .height(100.dp)
                 )
-
                 Surface(
                     color = Error,
                     shape = RoundedCornerShape(8.dp),
@@ -60,7 +57,6 @@ fun FoodItemCard(
                     )
                 }
             }
-
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(text = item.name, style = MaterialTheme.typography.titleMedium)
                 Text(text = item.category, style = MaterialTheme.typography.bodySmall)

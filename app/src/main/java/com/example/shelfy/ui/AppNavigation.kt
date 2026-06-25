@@ -39,6 +39,7 @@ object Routes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val foodItems = remember { mutableStateListOf<FoodItem>() }
     var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -49,12 +50,14 @@ fun AppNavigation() {
                     fab = { ShelfyFAB(onClick = { navController.navigate(Routes.ADD_PRODUCT) }) }
                 ) {
                     DashboardScreen(
+                        items = foodItems,
                         onFabClick = { navController.navigate(Routes.ADD_PRODUCT) },
                         onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) },
                         onSeeAllProducts = { navController.navigate(Routes.INVENTORY) }
                     )
                 }
             }
+
             composable(
                 route = Routes.ADD_PRODUCT,
                 enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
@@ -78,14 +81,13 @@ fun AppNavigation() {
                 popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
             ) {
-                SettingsScreen(
-                    onBack = { navController.popBackStack() }
-                )
+                SettingsScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Routes.INVENTORY) {
                 MainLayout(navController = navController) {
                     InventoryScreen(
+                        items = foodItems,
                         onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) }
                     )
                 }
@@ -102,8 +104,12 @@ fun AppNavigation() {
                 arguments = listOf(navArgument(Routes.PRODUCT_DETAILS_ARG) { type = NavType.IntType })
             ) { backStackEntry ->
                 val itemId = backStackEntry.arguments?.getInt(Routes.PRODUCT_DETAILS_ARG)
-                val item = FoodItem.mockFoodList.firstOrNull { it.id == itemId }
-                    ?: FoodItem.mockFoodList.first()
+                val item = foodItems.firstOrNull { it.id == itemId }
+
+                if (item == null) {
+                    navController.popBackStack()
+                    return@composable
+                }
 
                 MainLayout(navController = navController) {
                     ProductDetailsScreen(

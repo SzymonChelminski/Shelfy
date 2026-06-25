@@ -24,9 +24,7 @@ import com.example.shelfy.ui.theme.Text as ThemeText
 
 @Composable
 fun ShoppingScreen(modifier: Modifier = Modifier) {
-    val items = remember {
-        mutableStateListOf<ShoppingItem>().apply { addAll(ShoppingItem.mockShoppingList) }
-    }
+    val items = remember { mutableStateListOf<ShoppingItem>() }
     var newItemText by remember { mutableStateOf("") }
 
     val toBuy = items.filter { !it.isCompleted }
