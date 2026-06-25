@@ -1,7 +1,6 @@
 package com.example.shelfy.ui.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,10 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Primary
 import com.example.shelfy.ui.theme.Surface
@@ -38,15 +37,14 @@ fun InventoryItemCard(
         border = BorderStroke(1.dp, Primary.copy(alpha = 0.2f))
     ) {
         Column {
-            Image(
-                painter = painterResource(id = item.imageResourceId),
+            AsyncImage(
+                model = item.imageUrl,
                 contentDescription = item.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(110.dp)
             )
-
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = item.name,

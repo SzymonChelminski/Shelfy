@@ -1,15 +1,21 @@
 package com.example.shelfy.ui
 
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.shelfy.model.FoodItem
+import com.example.shelfy.model.PendingProduct
+import com.example.shelfy.ui.components.AddProductDialog
 import com.example.shelfy.ui.components.AddProductScreen
 import com.example.shelfy.ui.components.DashboardScreen
 import com.example.shelfy.ui.components.InventoryScreen
@@ -33,81 +39,99 @@ object Routes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val foodItems = remember { mutableStateListOf<FoodItem>() }
+    var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
 
-    NavHost(navController = navController, startDestination = Routes.DASHBOARD) {
-        composable(Routes.DASHBOARD) {
-            MainLayout(
-                navController = navController,
-                fab = { ShelfyFAB(onClick = { navController.navigate(Routes.ADD_PRODUCT) }) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(navController = navController, startDestination = Routes.DASHBOARD) {
+            composable(Routes.DASHBOARD) {
+                MainLayout(
+                    navController = navController,
+                    fab = { ShelfyFAB(onClick = { navController.navigate(Routes.ADD_PRODUCT) }) }
+                ) {
+                    DashboardScreen(
+                        items = foodItems,
+                        onFabClick = { navController.navigate(Routes.ADD_PRODUCT) },
+                        onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) },
+                        onSeeAllProducts = { navController.navigate(Routes.INVENTORY) }
+                    )
+                }
+            }
+
+            composable(
+                route = Routes.ADD_PRODUCT,
+                enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
+                exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
+                popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
+                popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
             ) {
-                DashboardScreen(
-                    onFabClick = { navController.navigate(Routes.ADD_PRODUCT) },
-                    onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) },
-                    onSeeAllProducts = { navController.navigate(Routes.INVENTORY) }
+                AddProductScreen(
+                    onBack = { navController.popBackStack() },
+                    onProductScanned = { product ->
+                        pendingProduct = product
+                        navController.popBackStack()
+                    }
                 )
             }
+
+            composable(
+                route = Routes.SETTINGS,
+                enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
+                exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
+                popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
+                popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
+            ) {
+                SettingsScreen(onBack = { navController.popBackStack() })
+            }
+
+            composable(Routes.INVENTORY) {
+                MainLayout(navController = navController) {
+                    InventoryScreen(
+                        items = foodItems,
+                        onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) }
+                    )
+                }
+            }
+
+            composable(Routes.SHOPPING) {
+                MainLayout(navController = navController) {
+                    ShoppingScreen()
+                }
+            }
+
+            composable(
+                route = Routes.PRODUCT_DETAILS,
+                arguments = listOf(navArgument(Routes.PRODUCT_DETAILS_ARG) { type = NavType.IntType })
+            ) { backStackEntry ->
+                val itemId = backStackEntry.arguments?.getInt(Routes.PRODUCT_DETAILS_ARG)
+                val item = foodItems.firstOrNull { it.id == itemId }
+
+                if (item == null) {
+                    navController.popBackStack()
+                    return@composable
+                }
+
+                MainLayout(navController = navController) {
+                    ProductDetailsScreen(
+                        item = item,
+                        onConsume = { navController.popBackStack() },
+                        onThrowAway = { navController.popBackStack() },
+                        onEdit = { },
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
         }
-        composable(
-            route = Routes.ADD_PRODUCT,
-            enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
-            exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
-            popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
-            popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
-        ) {
-            AddProductScreen(
-                onBack = { navController.popBackStack() }
+
+        pendingProduct?.let { product ->
+            AddProductDialog(
+                product = product,
+                onDismiss = { pendingProduct = null },
+                onConfirm = { name, brand, expiryDate ->
+                    Log.d("ADD_PRODUCT", "name=$name  brand=$brand  expiry=$expiryDate")
+                    pendingProduct = null
+                }
             )
-        }
-
-        composable(
-            route = Routes.SETTINGS,
-            enterTransition = { slideInHorizontally(animationSpec = tween(300)) { it } },
-            exitTransition = { slideOutHorizontally(animationSpec = tween(300)) { -it } },
-            popEnterTransition = { slideInHorizontally(animationSpec = tween(300)) { -it } },
-            popExitTransition = { slideOutHorizontally(animationSpec = tween(300)) { it } }
-        ) {
-            SettingsScreen(
-                onBack = { navController.popBackStack() }
-            )
-        }
-
-        composable(Routes.INVENTORY) {
-            MainLayout(
-                navController = navController
-            ) {
-                InventoryScreen(
-                    onProductClick = { itemId -> navController.navigate(Routes.productDetails(itemId)) }
-                )
-            }
-        }
-
-        composable(Routes.SHOPPING) {
-            MainLayout(
-                navController = navController
-            ) {
-                ShoppingScreen()
-            }
-        }
-
-        composable(
-            route = Routes.PRODUCT_DETAILS,
-            arguments = listOf(navArgument(Routes.PRODUCT_DETAILS_ARG) { type = NavType.IntType })
-        ) { backStackEntry ->
-            val itemId = backStackEntry.arguments?.getInt(Routes.PRODUCT_DETAILS_ARG)
-            val item = FoodItem.mockFoodList.firstOrNull { it.id == itemId }
-                ?: FoodItem.mockFoodList.first()
-
-            MainLayout(
-                navController = navController
-            ) {
-                ProductDetailsScreen(
-                    item = item,
-                    onConsume = { navController.popBackStack() },
-                    onThrowAway = { navController.popBackStack() },
-                    onEdit = {  },
-                    onBack = { navController.popBackStack() }
-                )
-            }
         }
     }
 }

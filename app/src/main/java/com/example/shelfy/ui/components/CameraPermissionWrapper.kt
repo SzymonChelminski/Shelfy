@@ -14,7 +14,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraPermissionWrapper() {
+fun CameraPermissionWrapper(onBarcodeScanned: (String) -> Unit) {
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
     LaunchedEffect(Unit) {
@@ -22,7 +22,7 @@ fun CameraPermissionWrapper() {
     }
 
     if (cameraPermissionState.status.isGranted) {
-        BarcodeScannerView()
+        BarcodeScannerView(onBarcodeScanned = onBarcodeScanned)
     } else {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("You must grant camera permission to use the scanner!")
