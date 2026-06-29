@@ -10,8 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -19,31 +19,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.shelfy.model.ShoppingItem
+import com.example.shelfy.ui.viewmodel.ShoppingViewModel
 import com.example.shelfy.ui.theme.Text as ThemeText
 
 @Composable
-fun ShoppingScreen(modifier: Modifier = Modifier) {
-    val items = remember { mutableStateListOf<ShoppingItem>() }
+fun ShoppingScreen(
+    viewModel: ShoppingViewModel,
+    modifier: Modifier = Modifier
+) {
+    val items by viewModel.items.collectAsState()
     var newItemText by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf(shoppingCategories.first()) }
 
     val toBuy = items.filter { !it.isCompleted }
     val completed = items.filter { it.isCompleted }
-
-    fun toggle(item: ShoppingItem) {
-        val index = items.indexOfFirst { it.id == item.id }
-        if (index >= 0) {
-            items[index] = items[index].copy(isCompleted = !items[index].isCompleted)
-        }
-    }
-
-    fun addItem() {
-        val name = newItemText.trim()
-        if (name.isEmpty()) return
-        val nextId = (items.maxOfOrNull { it.id } ?: 0) + 1
-        items.add(ShoppingItem(nextId, name, "Other", "1", false))
-        newItemText = ""
-    }
 
     Column(
         modifier = modifier
@@ -63,7 +52,15 @@ fun ShoppingScreen(modifier: Modifier = Modifier) {
         AddItemBar(
             value = newItemText,
             onValueChange = { newItemText = it },
-            onAdd = { addItem() }
+            selectedCategory = selectedCategory,
+            onCategoryChange = { selectedCategory = it },
+            onAdd = {
+                val name = newItemText.trim()
+                if (name.isNotEmpty()) {
+                    viewModel.addItem(name, selectedCategory)
+                    newItemText = ""
+                }
+            }
         )
 
         if (toBuy.isNotEmpty()) {
@@ -73,7 +70,8 @@ fun ShoppingScreen(modifier: Modifier = Modifier) {
             toBuy.forEach { item ->
                 ShoppingListItemCard(
                     item = item,
-                    onToggle = { toggle(item) },
+                    onToggle = { viewModel.toggleItem(item) },
+                    onDelete = { viewModel.deleteItem(item) },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }
@@ -86,7 +84,8 @@ fun ShoppingScreen(modifier: Modifier = Modifier) {
             completed.forEach { item ->
                 ShoppingListItemCard(
                     item = item,
-                    onToggle = { toggle(item) },
+                    onToggle = { viewModel.toggleItem(item) },
+                    onDelete = { viewModel.deleteItem(item) },
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
             }

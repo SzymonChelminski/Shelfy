@@ -14,12 +14,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,18 +35,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.example.shelfy.model.ShoppingItem
+import com.example.shelfy.data.local.entity.ShoppingItemEntity
 import com.example.shelfy.ui.theme.Primary
-import com.example.shelfy.ui.theme.PrimaryDark
 import com.example.shelfy.ui.theme.Surface
 import com.example.shelfy.ui.theme.Text as ThemeText
 
 @Composable
 fun ShoppingListItemCard(
-    item: ShoppingItem,
+    item: ShoppingItemEntity,
     onToggle: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Remove item?") },
+            text = { Text("\"${item.name}\" will be removed from your shopping list.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    onDelete()
+                }) {
+                    Text("Remove", color = Color(0xFFC62828), fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Card(
         onClick = onToggle,
         modifier = modifier.fillMaxWidth(),
@@ -72,12 +103,20 @@ fun ShoppingListItemCard(
                 Spacer(modifier = Modifier.width(12.dp))
             }
 
-            Text(
-                text = item.quantity,
-                color = if (item.isCompleted) ThemeText.copy(alpha = 0.4f) else ThemeText.copy(alpha = 0.7f),
-                style = MaterialTheme.typography.bodyMedium,
-                textDecoration = if (item.isCompleted) TextDecoration.LineThrough else null
-            )
+            if (!item.isCompleted) {
+                Spacer(modifier = Modifier.width(4.dp))
+                IconButton(
+                    onClick = { showDeleteDialog = true },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Remove item",
+                        tint = ThemeText.copy(alpha = 0.35f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -111,15 +150,16 @@ private fun CheckCircle(checked: Boolean) {
 
 @Composable
 private fun CategoryBadge(category: String) {
+    val (bg, fg) = categoryColors[category] ?: (Color(0xFFF0F0F0) to Color(0xFF616161))
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(Primary.copy(alpha = 0.15f))
+            .background(bg)
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
             text = category,
-            color = PrimaryDark,
+            color = fg,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold
         )

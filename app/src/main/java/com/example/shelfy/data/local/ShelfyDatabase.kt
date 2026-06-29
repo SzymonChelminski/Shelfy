@@ -5,12 +5,16 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.shelfy.data.local.dao.ScannedProductDao
+import com.example.shelfy.data.local.dao.ShoppingItemDao
 import com.example.shelfy.data.local.entity.ScannedProductEntity
+import com.example.shelfy.data.local.entity.ShoppingItemEntity
 
-@Database(entities = [ScannedProductEntity::class], version = 2, exportSchema = false)
+@Database(entities = [ScannedProductEntity::class, ShoppingItemEntity::class], version = 3, exportSchema = false)
 abstract class ShelfyDatabase : RoomDatabase() {
 
     abstract fun scannedProductDao(): ScannedProductDao
+
+    abstract fun shoppingItemDao(): ShoppingItemDao
 
     companion object {
         @Volatile

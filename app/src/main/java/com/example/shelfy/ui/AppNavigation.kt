@@ -28,6 +28,7 @@ import com.example.shelfy.ui.components.SettingsScreen
 import com.example.shelfy.ui.components.ShelfyFAB
 import com.example.shelfy.ui.components.ShoppingScreen
 import com.example.shelfy.ui.viewmodel.ScannerViewModel
+import com.example.shelfy.ui.viewmodel.ShoppingViewModel
 
 object Routes {
     const val DASHBOARD = "dashboard"
@@ -47,6 +48,9 @@ fun AppNavigation() {
     var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
     val viewModel: ScannerViewModel = viewModel(
         factory = ScannerViewModel.factory(DatabaseModule.repository)
+    )
+    val shoppingViewModel: ShoppingViewModel = viewModel(
+        factory = ShoppingViewModel.factory(DatabaseModule.shoppingRepository)
     )
     val savedProducts by viewModel.savedProducts.collectAsState()
     val foodItems = remember(savedProducts) {
@@ -117,7 +121,7 @@ fun AppNavigation() {
 
             composable(Routes.SHOPPING) {
                 MainLayout(navController = navController) {
-                    ShoppingScreen()
+                    ShoppingScreen(viewModel = shoppingViewModel)
                 }
             }
 
