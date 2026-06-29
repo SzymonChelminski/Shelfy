@@ -24,7 +24,7 @@ import com.example.shelfy.ui.theme.Text as TextColor
 fun AddProductDialog(
     product: PendingProduct,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, brand: String, expiryDate: String) -> Unit
+    onConfirm: (name: String, brand: String, expiryDateMillis: Long) -> Unit
 ) {
     var name by remember { mutableStateOf(product.name ?: "") }
     var brand by remember { mutableStateOf(product.brand ?: "") }
@@ -136,10 +136,10 @@ fun AddProductDialog(
                             onConfirm(
                                 name.ifBlank { product.name ?: "" },
                                 brand.ifBlank { product.brand ?: "" },
-                                expiryDate
+                                datePickerState.selectedDateMillis ?: 0L
                             )
                         },
-                        enabled = expiryDate.isNotEmpty() &&
+                        enabled = datePickerState.selectedDateMillis != null &&
                                 (name.isNotBlank() || product.name != null),
                         colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {

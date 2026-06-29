@@ -1,6 +1,5 @@
 package com.example.shelfy.ui
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -8,13 +7,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.shelfy.di.DatabaseModule
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.model.PendingProduct
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import com.example.shelfy.ui.components.AddProductDialog
 import com.example.shelfy.ui.components.AddProductScreen
 import com.example.shelfy.ui.components.DashboardScreen
@@ -23,6 +27,7 @@ import com.example.shelfy.ui.components.ProductDetailsScreen
 import com.example.shelfy.ui.components.SettingsScreen
 import com.example.shelfy.ui.components.ShelfyFAB
 import com.example.shelfy.ui.components.ShoppingScreen
+import com.example.shelfy.ui.viewmodel.ScannerViewModel
 
 object Routes {
     const val DASHBOARD = "dashboard"
@@ -39,8 +44,25 @@ object Routes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val foodItems = remember { mutableStateListOf<FoodItem>() }
     var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
+    val viewModel: ScannerViewModel = viewModel(
+        factory = ScannerViewModel.factory(DatabaseModule.repository)
+    )
+    val savedProducts by viewModel.savedProducts.collectAsState()
+    val foodItems = remember(savedProducts) {
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        savedProducts.map { entity ->
+            val daysLeft = ((entity.expiryDateMillis - System.currentTimeMillis()) / (1000L * 60 * 60 * 24)).toInt()
+            FoodItem(
+                id = entity.id.toInt(),
+                name = entity.name,
+                category = entity.brand,
+                expirationLabel = dateFormat.format(Date(entity.expiryDateMillis)),
+                imageUrl = entity.imageUrl,
+                daysLeft = daysLeft
+            )
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(navController = navController, startDestination = Routes.DASHBOARD) {
@@ -127,8 +149,17 @@ fun AppNavigation() {
             AddProductDialog(
                 product = product,
                 onDismiss = { pendingProduct = null },
-                onConfirm = { name, brand, expiryDate ->
-                    Log.d("ADD_PRODUCT", "name=$name  brand=$brand  expiry=$expiryDate")
+                onConfirm = { name, brand, expiryDateMillis ->
+                    pendingProduct?.let { product ->
+                        viewModel.saveProduct(
+                            barcode = product.barcode,
+                            name = name,
+                            brand = brand,
+                            imageUrl = product.imageUrl,
+                            nutriscoreGrade = product.nutriscoreGrade,
+                            expiryDateMillis = expiryDateMillis
+                        )
+                    }
                     pendingProduct = null
                 }
             )
