@@ -22,4 +22,7 @@ interface ScannedProductDao {
 
     @Query("SELECT * FROM scanned_products WHERE barcode = :barcode")
     fun getByBarcode(barcode: String): Flow<ScannedProductEntity?>
+
+    @Query("SELECT * FROM scanned_products WHERE expiryDateMillis >= :from AND expiryDateMillis < :to")
+    suspend fun getProductsExpiringBetween(from: Long, to: Long): List<ScannedProductEntity>
 }
