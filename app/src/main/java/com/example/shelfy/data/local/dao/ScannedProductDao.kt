@@ -26,4 +26,10 @@ interface ScannedProductDao {
 
     @Query("SELECT * FROM scanned_products WHERE barcode = :barcode")
     fun getByBarcode(barcode: String): Flow<ScannedProductEntity?>
+
+    @Query("SELECT * FROM scanned_products WHERE expiryDateMillis <= :thresholdMillis")
+    suspend fun getProductsExpiringBefore(thresholdMillis: Long): List<ScannedProductEntity>
+
+    @Query("DELETE FROM scanned_products")
+    suspend fun deleteAll()
 }

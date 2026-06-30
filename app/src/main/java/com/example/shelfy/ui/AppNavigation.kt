@@ -28,7 +28,10 @@ import com.example.shelfy.ui.components.ProductDetailsScreen
 import com.example.shelfy.ui.components.SettingsScreen
 import com.example.shelfy.ui.components.ShelfyFAB
 import com.example.shelfy.ui.components.ShoppingScreen
+import android.app.Application
+import androidx.compose.ui.platform.LocalContext
 import com.example.shelfy.ui.viewmodel.ScannerViewModel
+import com.example.shelfy.ui.viewmodel.SettingsViewModel
 import com.example.shelfy.ui.viewmodel.ShoppingViewModel
 
 object Routes {
@@ -54,6 +57,8 @@ fun AppNavigation() {
     val shoppingViewModel: ShoppingViewModel = viewModel(
         factory = ShoppingViewModel.factory(DatabaseModule.shoppingRepository)
     )
+    val application = LocalContext.current.applicationContext as Application
+    val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(application))
     val savedProducts by viewModel.savedProducts.collectAsState()
     val foodItems = remember(savedProducts) {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -144,10 +149,12 @@ fun AppNavigation() {
                     ProductDetailsScreen(
                         item = item,
                         onConsume = {
+                            settingsViewModel.recordConsumed()
                             viewModel.deleteProduct(item.id)
                             navController.popBackStack()
                         },
                         onThrowAway = {
+                            settingsViewModel.recordThrown()
                             viewModel.deleteProduct(item.id)
                             navController.popBackStack()
                         },
