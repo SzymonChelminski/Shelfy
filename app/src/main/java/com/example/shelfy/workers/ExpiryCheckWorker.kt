@@ -21,10 +21,8 @@ suspend fun checkExpiringProducts(context: Context) {
     val oneDayMillis = 24 * 60 * 60 * 1000L
     val startOfTomorrow = utcCal.timeInMillis + oneDayMillis
 
-    val products = dao.getProductsExpiringBetween(
-        from = startOfTomorrow,
-        to   = startOfTomorrow + oneDayMillis
-    )
+    val products = dao.getProductsExpiringBefore(startOfTomorrow + oneDayMillis)
+        .filter { it.expiryDateMillis >= startOfTomorrow }
 
     if (products.isNotEmpty()) {
         NotificationHelper.showExpiryNotification(context, products)

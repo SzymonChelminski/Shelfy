@@ -1,18 +1,26 @@
 package com.example.shelfy.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FoodBank
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +39,8 @@ fun InventoryItemCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val catColor = if (item.category.isNotEmpty()) FoodCategories.colorFor(item.category) else Primary
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -39,14 +49,31 @@ fun InventoryItemCard(
         border = BorderStroke(1.dp, Primary.copy(alpha = 0.2f))
     ) {
         Column {
-            AsyncImage(
-                model = item.imageUrl,
-                contentDescription = item.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(110.dp)
-            )
+            if (item.imageUrl.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .background(catColor.copy(alpha = 0.08f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.FoodBank,
+                        contentDescription = null,
+                        tint = catColor.copy(alpha = 0.4f),
+                        modifier = Modifier.size(44.dp)
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                )
+            }
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = item.name,
@@ -58,7 +85,6 @@ fun InventoryItemCard(
                 )
                 if (item.category.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp))
-                    val catColor = FoodCategories.colorFor(item.category)
                     Surface(
                         color = catColor.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(50)

@@ -42,7 +42,7 @@ fun ShelfyNavigationBar(navController: NavController) {
     )
 
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color.White,
     ) {
         items.forEach { item ->
             NavigationBarItem(

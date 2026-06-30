@@ -1,7 +1,9 @@
 package com.example.shelfy.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +14,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -75,13 +79,18 @@ fun AddProductDialog(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)),
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { },
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -150,25 +159,50 @@ fun AddProductDialog(
                         style = MaterialTheme.typography.labelMedium,
                         color = if (categoryError != null) MaterialTheme.colorScheme.error else TextColor.copy(alpha = 0.6f)
                     )
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    val chipScrollState = rememberScrollState()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .drawWithContent {
+                                drawContent()
+                                if (chipScrollState.canScrollBackward) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            0f to Color.White,
+                                            0.25f to Color.Transparent
+                                        )
+                                    )
+                                }
+                                if (chipScrollState.canScrollForward) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            0.75f to Color.Transparent,
+                                            1f to Color.White
+                                        )
+                                    )
+                                }
+                            }
                     ) {
-                        FoodCategories.all.forEach { cat ->
-                            val catColor = FoodCategories.colorFor(cat)
-                            FilterChip(
-                                selected = selectedCategory == cat,
-                                onClick = { selectedCategory = cat },
-                                label = { Text(cat) },
-                                shape = RoundedCornerShape(50),
-                                border = null,
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = catColor.copy(alpha = 0.15f),
-                                    labelColor = catColor,
-                                    selectedContainerColor = catColor,
-                                    selectedLabelColor = Color.White
+                        Row(
+                            modifier = Modifier.horizontalScroll(chipScrollState),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            FoodCategories.all.forEach { cat ->
+                                val catColor = FoodCategories.colorFor(cat)
+                                FilterChip(
+                                    selected = selectedCategory == cat,
+                                    onClick = { selectedCategory = cat },
+                                    label = { Text(cat) },
+                                    shape = RoundedCornerShape(50),
+                                    border = null,
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        containerColor = catColor.copy(alpha = 0.15f),
+                                        labelColor = catColor,
+                                        selectedContainerColor = catColor,
+                                        selectedLabelColor = Color.White
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                     if (categoryError != null) {

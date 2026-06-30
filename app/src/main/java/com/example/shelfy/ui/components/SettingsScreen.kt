@@ -29,7 +29,11 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.NotificationsActive
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.shelfy.notifications.ExpiryNotificationWorker
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -293,6 +297,16 @@ fun SettingsScreen(
                             ChevronIcon(tint = ThemeText.copy(alpha = 0.4f))
                         }
                     }
+                )
+                HorizontalDivider(color = DividerColor)
+                SettingsRow(
+                    icon = Icons.Outlined.PlayArrow,
+                    title = "Test Notification",
+                    onClick = {
+                        val work = OneTimeWorkRequestBuilder<ExpiryNotificationWorker>().build()
+                        WorkManager.getInstance(context).enqueue(work)
+                    },
+                    trailing = { ChevronIcon(tint = ThemeText.copy(alpha = 0.4f)) }
                 )
             }
         }
