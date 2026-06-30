@@ -42,11 +42,13 @@ fun InventoryScreen(
     var query by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ALL_CATEGORIES) }
 
-    val filteredItems = items.filter { item ->
-        val matchesCategory = selectedCategory == ALL_CATEGORIES || item.category == selectedCategory
-        val matchesQuery = item.name.contains(query, ignoreCase = true)
-        matchesCategory && matchesQuery
-    }
+    val filteredItems = items
+        .filter { item ->
+            val matchesCategory = selectedCategory == ALL_CATEGORIES || item.category == selectedCategory
+            val matchesQuery = item.name.contains(query, ignoreCase = true)
+            matchesCategory && matchesQuery
+        }
+        .sortedWith(compareBy({ it.category }, { it.daysLeft }))
 
     val isFiltering = query.isNotEmpty() || selectedCategory != ALL_CATEGORIES
 

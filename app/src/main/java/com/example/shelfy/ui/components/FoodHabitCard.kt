@@ -23,6 +23,8 @@ import com.example.shelfy.ui.theme.Text as ThemeText
 
 @Composable
 fun FoodHabitCard(
+    consumedCount: Int,
+    thrownCount: Int,
     consumedPercent: Int,
     modifier: Modifier = Modifier
 ) {
@@ -43,17 +45,31 @@ fun FoodHabitCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "$consumedPercent% Consumed",
-                    color = Primary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "$thrownPercent% Thrown away",
-                    color = ThemeText.copy(alpha = 0.5f),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Column {
+                    Text(
+                        text = "$consumedPercent% Consumed",
+                        color = Primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "$consumedCount product${if (consumedCount != 1) "s" else ""}",
+                        color = Primary.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    Text(
+                        text = "$thrownPercent% Thrown away",
+                        color = ThemeText.copy(alpha = 0.5f),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "$thrownCount product${if (thrownCount != 1) "s" else ""}",
+                        color = ThemeText.copy(alpha = 0.35f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

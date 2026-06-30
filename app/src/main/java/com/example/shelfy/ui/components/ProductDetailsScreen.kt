@@ -62,7 +62,7 @@ fun ProductDetailsScreen(
                 InfoCard(
                     icon = Icons.Default.ShoppingCart,
                     title = "Quantity",
-                    value = "1 Bundle (~450g)",
+                    value = item.quantity.ifBlank { "—" },
                     modifier = Modifier.weight(1f)
                 )
             }

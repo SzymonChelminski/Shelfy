@@ -34,7 +34,9 @@ class ScannerViewModel(private val repository: ScannedProductRepository) : ViewM
         brand: String,
         imageUrl: String?,
         nutriscoreGrade: String?,
-        expiryDateMillis: Long
+        expiryDateMillis: Long,
+        quantity: String = "",
+        category: String = ""
     ) {
         viewModelScope.launch {
             repository.insert(
@@ -44,9 +46,27 @@ class ScannerViewModel(private val repository: ScannedProductRepository) : ViewM
                     brand = brand,
                     imageUrl = imageUrl,
                     nutriscoreGrade = nutriscoreGrade,
-                    expiryDateMillis = expiryDateMillis
+                    expiryDateMillis = expiryDateMillis,
+                    quantity = quantity,
+                    category = category
                 )
             )
+        }
+    }
+
+    fun deleteProduct(id: Int) {
+        viewModelScope.launch {
+            val entity = savedProducts.value.firstOrNull { it.id.toInt() == id }
+            entity?.let { repository.delete(it) }
+        }
+    }
+
+    fun updateProduct(id: Int, name: String, brand: String, expiryDateMillis: Long, quantity: String, category: String) {
+        viewModelScope.launch {
+            val entity = savedProducts.value.firstOrNull { it.id.toInt() == id }
+            entity?.let {
+                repository.update(it.copy(name = name, brand = brand, expiryDateMillis = expiryDateMillis, quantity = quantity, category = category))
+            }
         }
     }
 

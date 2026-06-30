@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Error
+import com.example.shelfy.ui.theme.Primary
+import com.example.shelfy.ui.theme.Warning
 
 @Composable
 fun FoodItemCard(
@@ -26,6 +28,13 @@ fun FoodItemCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val badgeColor = when {
+        item.daysLeft <= 0 -> Error
+        item.daysLeft < 3 -> Color(0xFFEA580C)
+        item.daysLeft < 7 -> Warning
+        else -> Primary
+    }
+
     Card(
         onClick = onClick,
         modifier = modifier
@@ -45,7 +54,7 @@ fun FoodItemCard(
                         .height(100.dp)
                 )
                 Surface(
-                    color = Error,
+                    color = badgeColor,
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.padding(10.dp)
                 ) {

@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.shelfy.data.local.entity.ScannedProductEntity
 import com.example.shelfy.model.FoodCategories
-import com.example.shelfy.model.PendingProduct
 import com.example.shelfy.ui.theme.Primary
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -25,19 +25,20 @@ import com.example.shelfy.ui.theme.Text as TextColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddProductDialog(
-    product: PendingProduct,
+fun EditProductDialog(
+    entity: ScannedProductEntity,
     onDismiss: () -> Unit,
     onConfirm: (name: String, brand: String, expiryDateMillis: Long, quantity: String, category: String) -> Unit
 ) {
-    var name by remember { mutableStateOf(product.name ?: "") }
-    var brand by remember { mutableStateOf(product.brand ?: "") }
-    var quantity by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("") }
-    var expiryDate by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf(entity.name) }
+    var brand by remember { mutableStateOf(entity.brand) }
+    var quantity by remember { mutableStateOf(entity.quantity) }
+    var selectedCategory by remember { mutableStateOf(entity.category) }
     var submitted by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+    val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    var expiryDate by remember { mutableStateOf(sdf.format(Date(entity.expiryDateMillis))) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = entity.expiryDateMillis)
 
     val nameError = if (submitted) when {
         name.trim().length < 2 -> "At least 2 characters required"
@@ -50,7 +51,6 @@ fun AddProductDialog(
     } else null
 
     val categoryError = if (submitted && selectedCategory.isEmpty()) "Please select a category" else null
-    val dateError = if (submitted && datePickerState.selectedDateMillis == null) "Please select a date" else null
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -58,7 +58,6 @@ fun AddProductDialog(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                         expiryDate = sdf.format(Date(millis))
                     }
                     showDatePicker = false
@@ -93,41 +92,33 @@ fun AddProductDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = "Add product",
+                    text = "Edit product",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextColor
                 )
 
-                if (product.name != null) {
-                    ProductInfoRow(label = "Product", value = product.name)
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        OutlinedTextField(
-                            value = name,
-                            onValueChange = { name = it },
-                            label = { Text("Product name") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            isError = nameError != null
-                        )
-                        if (nameError != null) {
-                            Text(nameError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
-                        }
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { if (it.length <= 50) name = it },
+                        label = { Text("Product name") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = nameError != null
+                    )
+                    if (nameError != null) {
+                        Text(nameError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
                     }
                 }
 
-                if (product.brand != null) {
-                    ProductInfoRow(label = "Brand", value = product.brand)
-                } else {
-                    OutlinedTextField(
-                        value = brand,
-                        onValueChange = { brand = it },
-                        label = { Text("Brand") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                }
+                OutlinedTextField(
+                    value = brand,
+                    onValueChange = { if (it.length <= 30) brand = it },
+                    label = { Text("Brand") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
 
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedTextField(
@@ -176,25 +167,18 @@ fun AddProductDialog(
                     }
                 }
 
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    OutlinedTextField(
-                        value = expiryDate,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Expiry date") },
-                        placeholder = { Text("Select date") },
-                        trailingIcon = {
-                            IconButton(onClick = { showDatePicker = true }) {
-                                Icon(Icons.Default.CalendarToday, contentDescription = "Pick date", tint = Primary)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = dateError != null
-                    )
-                    if (dateError != null) {
-                        Text(dateError, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
-                    }
-                }
+                OutlinedTextField(
+                    value = expiryDate,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Expiry date") },
+                    trailingIcon = {
+                        IconButton(onClick = { showDatePicker = true }) {
+                            Icon(Icons.Default.CalendarToday, contentDescription = "Pick date", tint = Primary)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -208,44 +192,26 @@ fun AddProductDialog(
                     Button(
                         onClick = {
                             submitted = true
-                            val trimmedName = name.trim().ifEmpty { product.name ?: "" }
-                            val isNameValid = trimmedName.length >= 2
+                            val isNameValid = name.trim().length in 2..50
                             val isQuantityValid = quantity.isBlank() || quantity.trim().isNotEmpty()
                             val isCategoryValid = selectedCategory.isNotEmpty()
-                            val isDateValid = datePickerState.selectedDateMillis != null
-                            if (isNameValid && isQuantityValid && isCategoryValid && isDateValid) {
+                            if (isNameValid && isQuantityValid && isCategoryValid) {
                                 onConfirm(
-                                    trimmedName,
-                                    brand.trim().ifBlank { product.brand ?: "" },
-                                    datePickerState.selectedDateMillis!!,
+                                    name.trim(),
+                                    brand.trim(),
+                                    datePickerState.selectedDateMillis ?: entity.expiryDateMillis,
                                     quantity.trim(),
                                     selectedCategory
                                 )
                             }
                         },
+                        enabled = true,
                         colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {
-                        Text("Add", color = Color.White)
+                        Text("Save", color = Color.White)
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun ProductInfoRow(label: String, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = TextColor.copy(alpha = 0.5f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = TextColor
-        )
     }
 }
