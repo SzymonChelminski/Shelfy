@@ -19,6 +19,7 @@ import com.example.shelfy.model.PendingProduct
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.shelfy.ui.components.NotificationPermissionEffect
 import com.example.shelfy.ui.components.AddProductDialog
 import com.example.shelfy.ui.components.AddProductScreen
 import com.example.shelfy.ui.components.EditProductDialog
@@ -75,6 +76,8 @@ fun AppNavigation() {
             )
         }
     }
+
+    NotificationPermissionEffect()
 
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(navController = navController, startDestination = Routes.DASHBOARD) {
