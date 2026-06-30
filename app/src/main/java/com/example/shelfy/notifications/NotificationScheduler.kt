@@ -11,20 +11,30 @@ object NotificationScheduler {
 
     private const val WORK_NAME = "shelfy_expiry_check"
 
+    // Used when user changes settings — always resets the schedule
     fun schedule(context: Context, hour: Int, minute: Int) {
-        val delay = delayUntilNext(hour, minute)
-        val request = PeriodicWorkRequestBuilder<ExpiryNotificationWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            WORK_NAME,
-            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-            request
-        )
+        enqueue(context, hour, minute, ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE)
+    }
+
+    // Used on app start / boot — keeps existing schedule if already running
+    fun scheduleIfNotRunning(context: Context, hour: Int, minute: Int) {
+        enqueue(context, hour, minute, ExistingPeriodicWorkPolicy.KEEP)
     }
 
     fun cancel(context: Context) {
         WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+    }
+
+    private fun enqueue(
+        context: Context,
+        hour: Int,
+        minute: Int,
+        policy: ExistingPeriodicWorkPolicy
+    ) {
+        val request = PeriodicWorkRequestBuilder<ExpiryNotificationWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(delayUntilNext(hour, minute), TimeUnit.MILLISECONDS)
+            .build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK_NAME, policy, request)
     }
 
     private fun delayUntilNext(hour: Int, minute: Int): Long {

@@ -30,16 +30,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     val alertHour = dataStore.data
-        .map { it[NotificationKeys.ALERT_HOUR] ?: 18 }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 18)
+        .map { it[NotificationKeys.ALERT_HOUR] ?: 12 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 12)
 
     val alertMinute = dataStore.data
         .map { it[NotificationKeys.ALERT_MINUTE] ?: 0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     val advanceWarningDays = dataStore.data
-        .map { it[NotificationKeys.ADVANCE_DAYS] ?: 2 }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 2)
+        .map { it[NotificationKeys.ADVANCE_DAYS] ?: 1 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 1)
 
     val consumedCount = dataStore.data
         .map { it[HabitKeys.CONSUMED_COUNT] ?: 0 }

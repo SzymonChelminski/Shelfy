@@ -4,25 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.example.shelfy.data.preferences.NotificationKeys
+import com.example.shelfy.data.preferences.settingsDataStore
 import com.example.shelfy.di.DatabaseModule
-import com.example.shelfy.notifications.NotificationHelper
+import com.example.shelfy.notifications.NotificationScheduler
 import com.example.shelfy.ui.AppNavigation
 import com.example.shelfy.ui.theme.ShelfyTheme
-import com.example.shelfy.workers.ExpiryCheckWorker
-import com.example.shelfy.workers.checkExpiringProducts
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DatabaseModule.init(this)
-        NotificationHelper.createChannel(this)
-        scheduleExpiryCheck()
-        lifecycleScope.launch { checkExpiringProducts(applicationContext) }
+        // Cancel legacy worker from the old notification system
+        WorkManager.getInstance(this).cancelUniqueWork("expiry_check")
+        autoScheduleNotifications()
         setContent {
             ShelfyTheme {
                 AppNavigation()
@@ -30,11 +28,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun scheduleExpiryCheck() {
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "expiry_check",
-            ExistingPeriodicWorkPolicy.KEEP,
-            PeriodicWorkRequestBuilder<ExpiryCheckWorker>(24, TimeUnit.HOURS).build()
-        )
+    private fun autoScheduleNotifications() {
+        lifecycleScope.launch {
+            val prefs = settingsDataStore.data.first()
+            val enabled = prefs[NotificationKeys.NOTIFICATIONS_ENABLED] ?: true
+            if (!enabled) return@launch
+            val hour = prefs[NotificationKeys.ALERT_HOUR] ?: 12
+            val minute = prefs[NotificationKeys.ALERT_MINUTE] ?: 0
+            // KEEP policy: won't reset the schedule if already running
+            NotificationScheduler.scheduleIfNotRunning(applicationContext, hour, minute)
+        }
     }
 }
