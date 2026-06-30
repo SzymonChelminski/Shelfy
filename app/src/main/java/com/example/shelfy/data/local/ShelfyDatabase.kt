@@ -9,7 +9,7 @@ import com.example.shelfy.data.local.dao.ShoppingItemDao
 import com.example.shelfy.data.local.entity.ScannedProductEntity
 import com.example.shelfy.data.local.entity.ShoppingItemEntity
 
-@Database(entities = [ScannedProductEntity::class, ShoppingItemEntity::class], version = 3, exportSchema = false)
+@Database(entities = [ScannedProductEntity::class, ShoppingItemEntity::class], version = 5, exportSchema = false)
 abstract class ShelfyDatabase : RoomDatabase() {
 
     abstract fun scannedProductDao(): ScannedProductDao

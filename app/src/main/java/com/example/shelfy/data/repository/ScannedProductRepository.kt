@@ -13,4 +13,6 @@ class ScannedProductRepository(private val dao: ScannedProductDao) {
     suspend fun insert(product: ScannedProductEntity) = dao.insert(product)
 
     suspend fun delete(product: ScannedProductEntity) = dao.delete(product)
+
+    suspend fun update(product: ScannedProductEntity) = dao.update(product)
 }

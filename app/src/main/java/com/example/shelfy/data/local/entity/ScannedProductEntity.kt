@@ -12,5 +12,7 @@ data class ScannedProductEntity(
     val imageUrl: String?,
     val nutriscoreGrade: String?,
     val expiryDateMillis: Long,
+    val quantity: String = "",
+    val category: String = "",
     val dateAddedMillis: Long = System.currentTimeMillis()
 )

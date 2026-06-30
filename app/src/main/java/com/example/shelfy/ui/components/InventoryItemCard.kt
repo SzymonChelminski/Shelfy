@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,9 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.shelfy.model.FoodCategories
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Primary
-import com.example.shelfy.ui.theme.Surface
+import com.example.shelfy.ui.theme.Surface as SurfaceColor
 import com.example.shelfy.ui.theme.Text as ThemeText
 
 @Composable
@@ -33,7 +35,7 @@ fun InventoryItemCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Surface),
+        colors = CardDefaults.cardColors(containerColor = SurfaceColor),
         border = BorderStroke(1.dp, Primary.copy(alpha = 0.2f))
     ) {
         Column {
@@ -54,11 +56,22 @@ fun InventoryItemCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = item.category,
-                    color = ThemeText.copy(alpha = 0.5f),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                if (item.category.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    val catColor = FoodCategories.colorFor(item.category)
+                    Surface(
+                        color = catColor.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = item.category,
+                            color = catColor,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 FreshnessBadge(daysLeft = item.daysLeft)
             }

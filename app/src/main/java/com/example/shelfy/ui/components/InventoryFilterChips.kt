@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.shelfy.model.FoodCategories
 import com.example.shelfy.ui.theme.Primary
 import com.example.shelfy.ui.theme.Surface
 import com.example.shelfy.ui.theme.Text as ThemeText
@@ -29,15 +30,17 @@ fun InventoryFilterChips(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(categories) { category ->
+            val chipColor = if (category == "All") Primary else FoodCategories.colorFor(category)
             FilterChip(
                 selected = category == selectedCategory,
                 onClick = { onCategorySelected(category) },
                 label = { Text(text = category) },
                 shape = RoundedCornerShape(50),
+                border = null,
                 colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Surface,
-                    labelColor = ThemeText,
-                    selectedContainerColor = Primary,
+                    containerColor = chipColor.copy(alpha = 0.15f),
+                    labelColor = chipColor,
+                    selectedContainerColor = chipColor,
                     selectedLabelColor = Color.White
                 )
             )

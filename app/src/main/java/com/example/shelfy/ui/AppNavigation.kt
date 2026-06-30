@@ -21,6 +21,7 @@ import java.util.Date
 import java.util.Locale
 import com.example.shelfy.ui.components.AddProductDialog
 import com.example.shelfy.ui.components.AddProductScreen
+import com.example.shelfy.ui.components.EditProductDialog
 import com.example.shelfy.ui.components.DashboardScreen
 import com.example.shelfy.ui.components.InventoryScreen
 import com.example.shelfy.ui.components.ProductDetailsScreen
@@ -46,6 +47,7 @@ object Routes {
 fun AppNavigation() {
     val navController = rememberNavController()
     var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
+    var editingItemId by remember { mutableStateOf<Int?>(null) }
     val viewModel: ScannerViewModel = viewModel(
         factory = ScannerViewModel.factory(DatabaseModule.repository)
     )
@@ -60,10 +62,11 @@ fun AppNavigation() {
             FoodItem(
                 id = entity.id.toInt(),
                 name = entity.name,
-                category = entity.brand,
+                category = entity.category,
                 expirationLabel = dateFormat.format(Date(entity.expiryDateMillis)),
                 imageUrl = entity.imageUrl,
-                daysLeft = daysLeft
+                daysLeft = daysLeft,
+                quantity = entity.quantity
             )
         }
     }
@@ -140,9 +143,15 @@ fun AppNavigation() {
                 MainLayout(navController = navController) {
                     ProductDetailsScreen(
                         item = item,
-                        onConsume = { navController.popBackStack() },
-                        onThrowAway = { navController.popBackStack() },
-                        onEdit = { },
+                        onConsume = {
+                            viewModel.deleteProduct(item.id)
+                            navController.popBackStack()
+                        },
+                        onThrowAway = {
+                            viewModel.deleteProduct(item.id)
+                            navController.popBackStack()
+                        },
+                        onEdit = { editingItemId = item.id },
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -153,20 +162,34 @@ fun AppNavigation() {
             AddProductDialog(
                 product = product,
                 onDismiss = { pendingProduct = null },
-                onConfirm = { name, brand, expiryDateMillis ->
-                    pendingProduct?.let { product ->
-                        viewModel.saveProduct(
-                            barcode = product.barcode,
-                            name = name,
-                            brand = brand,
-                            imageUrl = product.imageUrl,
-                            nutriscoreGrade = product.nutriscoreGrade,
-                            expiryDateMillis = expiryDateMillis
-                        )
-                    }
+                onConfirm = { name, brand, expiryDateMillis, quantity, category ->
+                    viewModel.saveProduct(
+                        barcode = product.barcode,
+                        name = name,
+                        brand = brand,
+                        imageUrl = product.imageUrl,
+                        nutriscoreGrade = product.nutriscoreGrade,
+                        expiryDateMillis = expiryDateMillis,
+                        quantity = quantity,
+                        category = category
+                    )
                     pendingProduct = null
                 }
             )
+        }
+
+        editingItemId?.let { id ->
+            val entity = savedProducts.firstOrNull { it.id.toInt() == id }
+            entity?.let {
+                EditProductDialog(
+                    entity = it,
+                    onDismiss = { editingItemId = null },
+                    onConfirm = { name, brand, expiryDateMillis, quantity, category ->
+                        viewModel.updateProduct(id, name, brand, expiryDateMillis, quantity, category)
+                        editingItemId = null
+                    }
+                )
+            }
         }
     }
 }

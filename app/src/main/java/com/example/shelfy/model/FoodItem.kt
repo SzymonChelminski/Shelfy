@@ -7,6 +7,7 @@ data class FoodItem(
     val expirationLabel: String,
     val imageUrl: String?,
     val daysLeft: Int,
+    val quantity: String = "",
 ) {
     fun getFreshnessProgress(): Float {
         return when {

@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.shelfy.data.local.entity.ScannedProductEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -16,6 +17,9 @@ interface ScannedProductDao {
 
     @Delete
     suspend fun delete(product: ScannedProductEntity)
+
+    @Update
+    suspend fun update(product: ScannedProductEntity)
 
     @Query("SELECT * FROM scanned_products ORDER BY expiryDateMillis ASC")
     fun getAllProducts(): Flow<List<ScannedProductEntity>>
