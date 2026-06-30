@@ -88,7 +88,17 @@ fun AddProductScreen(
         Spacer(modifier = Modifier.height(56.dp))
 
         ManualEntryCard(
-            onManualAddClick = { }
+            onManualAddClick = {
+                onProductScanned(
+                    PendingProduct(
+                        barcode = "manual_${System.currentTimeMillis()}",
+                        name = null,
+                        brand = null,
+                        imageUrl = null,
+                        nutriscoreGrade = null
+                    )
+                )
+            }
         )
     }
 }
