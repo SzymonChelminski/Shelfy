@@ -24,12 +24,29 @@ fun AddProductScreen(
 ) {
     var scannedBarcode by remember { mutableStateOf("") }
     var fetchedProduct by remember { mutableStateOf<OpenFoodProductDto?>(null) }
+    var isFetchComplete by remember { mutableStateOf(false) }
+    var isAnimationComplete by remember { mutableStateOf(false) }
 
     LaunchedEffect(scannedBarcode) {
         if (scannedBarcode.isNotEmpty()) {
             Log.d("BARCODE_SCAN", "Fetching: $scannedBarcode")
             fetchedProduct = ProductRepository.getProduct(scannedBarcode)
             Log.d("BARCODE_SCAN", "Result: $fetchedProduct")
+            isFetchComplete = true
+        }
+    }
+
+    LaunchedEffect(isFetchComplete, isAnimationComplete) {
+        if (isFetchComplete && isAnimationComplete) {
+            onProductScanned(
+                PendingProduct(
+                    barcode = scannedBarcode,
+                    name = fetchedProduct?.productName,
+                    brand = fetchedProduct?.brands,
+                    imageUrl = fetchedProduct?.imageUrl,
+                    nutriscoreGrade = fetchedProduct?.nutriscoreGrade
+                )
+            )
         }
     }
 
@@ -70,17 +87,7 @@ fun AddProductScreen(
             )
             if (scannedBarcode.isNotEmpty()) {
                 ScanSuccessOverlay(
-                    onAnimationComplete = {
-                        onProductScanned(
-                            PendingProduct(
-                                barcode = scannedBarcode,
-                                name = fetchedProduct?.productName,
-                                brand = fetchedProduct?.brands,
-                                imageUrl = fetchedProduct?.imageUrl,
-                                nutriscoreGrade = fetchedProduct?.nutriscoreGrade
-                            )
-                        )
-                    }
+                    onAnimationComplete = { isAnimationComplete = true }
                 )
             }
         }
