@@ -1,30 +1,21 @@
 package com.example.shelfy.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FoodBank
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.shelfy.model.FoodCategories
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Error
@@ -56,31 +47,15 @@ fun FoodItemCard(
     ) {
         Column {
             Box {
-                if (item.imageUrl.isNullOrEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .background(catColor.copy(alpha = 0.08f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.FoodBank,
-                            contentDescription = null,
-                            tint = catColor.copy(alpha = 0.4f),
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                } else {
-                    AsyncImage(
-                        model = item.imageUrl,
-                        contentDescription = item.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                    )
-                }
+                ProductImage(
+                    imageUrl = item.imageUrl,
+                    tint = catColor,
+                    contentDescription = item.name,
+                    iconSize = 40.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                )
                 Surface(
                     color = badgeColor,
                     shape = RoundedCornerShape(8.dp),

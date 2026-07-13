@@ -9,24 +9,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import com.example.shelfy.model.FoodCategories
 import com.example.shelfy.model.FoodItem
+import com.example.shelfy.ui.theme.Primary
 
 @Composable
 fun ProductHeader(item: FoodItem) {
+    val catColor = if (item.category.isNotEmpty()) FoodCategories.colorFor(item.category) else Primary
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(300.dp)
     ) {
-        AsyncImage(
-            model = item.imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+        ProductImage(
+            imageUrl = item.imageUrl,
+            tint = catColor,
+            contentDescription = item.name,
+            iconSize = 64.dp,
             modifier = Modifier.fillMaxSize()
         )
         Box(

@@ -24,11 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.outlined.FoodBank
-import coil.compose.AsyncImage
 import com.example.shelfy.model.FoodCategories
 import com.example.shelfy.model.FoodItem
 import com.example.shelfy.ui.theme.Error
@@ -76,31 +73,14 @@ fun FoodListCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (item.imageUrl.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(catColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.FoodBank,
-                        contentDescription = null,
-                        tint = catColor.copy(alpha = 0.45f),
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            } else {
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                )
-            }
+            ProductImage(
+                imageUrl = item.imageUrl,
+                tint = catColor,
+                iconSize = 28.dp,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            )
 
             Column(
                 modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
