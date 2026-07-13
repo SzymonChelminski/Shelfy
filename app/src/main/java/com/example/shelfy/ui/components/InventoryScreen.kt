@@ -74,13 +74,15 @@ fun InventoryScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        InventoryFilterChips(
-            categories = categories,
-            selectedCategory = selectedCategory,
-            onCategorySelected = { selectedCategory = it }
-        )
+        if (items.isNotEmpty()) {
+            InventoryFilterChips(
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it }
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         if (filteredItems.isEmpty()) {
             Box(
