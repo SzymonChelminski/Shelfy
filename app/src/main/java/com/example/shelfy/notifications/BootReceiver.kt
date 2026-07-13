@@ -13,13 +13,19 @@ import kotlinx.coroutines.launch
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
-            val prefs = context.settingsDataStore.data.first()
-            val enabled = prefs[NotificationKeys.NOTIFICATIONS_ENABLED] ?: true
-            if (!enabled) return@launch
-            val hour = prefs[NotificationKeys.ALERT_HOUR] ?: 12
-            val minute = prefs[NotificationKeys.ALERT_MINUTE] ?: 0
-            NotificationScheduler.schedule(context, hour, minute)
+            try {
+                val prefs = context.settingsDataStore.data.first()
+                val enabled = prefs[NotificationKeys.NOTIFICATIONS_ENABLED] ?: true
+                if (enabled) {
+                    val hour = prefs[NotificationKeys.ALERT_HOUR] ?: 12
+                    val minute = prefs[NotificationKeys.ALERT_MINUTE] ?: 0
+                    NotificationScheduler.schedule(context, hour, minute)
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }
