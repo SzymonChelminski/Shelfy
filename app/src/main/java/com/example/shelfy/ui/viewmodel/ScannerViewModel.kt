@@ -1,18 +1,26 @@
 package com.example.shelfy.ui.viewmodel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.shelfy.data.local.entity.ScannedProductEntity
 import com.example.shelfy.data.repository.ScannedProductRepository
+import com.example.shelfy.notifications.ExpiryNotificationWorker
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ScannerViewModel(private val repository: ScannedProductRepository) : ViewModel() {
+class ScannerViewModel(
+    application: Application,
+    private val repository: ScannedProductRepository
+) : AndroidViewModel(application) {
 
     val savedProducts: StateFlow<List<ScannedProductEntity>> = repository
         .getAllProducts()
@@ -51,6 +59,7 @@ class ScannerViewModel(private val repository: ScannedProductRepository) : ViewM
                     category = category
                 )
             )
+            triggerExpiryCheck()
         }
     }
 
@@ -66,16 +75,24 @@ class ScannerViewModel(private val repository: ScannedProductRepository) : ViewM
             val entity = savedProducts.value.firstOrNull { it.id.toInt() == id }
             entity?.let {
                 repository.update(it.copy(name = name, brand = brand, expiryDateMillis = expiryDateMillis, quantity = quantity, category = category))
+                triggerExpiryCheck()
             }
         }
     }
 
+    // Runs an immediate check instead of waiting for the next daily periodic run,
+    // so a product added/edited close to its expiry window is caught right away.
+    private fun triggerExpiryCheck() {
+        val work = OneTimeWorkRequestBuilder<ExpiryNotificationWorker>().build()
+        WorkManager.getInstance(getApplication()).enqueue(work)
+    }
+
     companion object {
-        fun factory(repository: ScannedProductRepository): ViewModelProvider.Factory =
+        fun factory(application: Application, repository: ScannedProductRepository): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                    ScannerViewModel(repository) as T
+                    ScannerViewModel(application, repository) as T
             }
     }
 }

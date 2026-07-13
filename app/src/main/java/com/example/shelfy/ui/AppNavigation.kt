@@ -52,19 +52,25 @@ fun AppNavigation() {
     val navController = rememberNavController()
     var pendingProduct by remember { mutableStateOf<PendingProduct?>(null) }
     var editingItemId by remember { mutableStateOf<Int?>(null) }
+    val application = LocalContext.current.applicationContext as Application
     val viewModel: ScannerViewModel = viewModel(
-        factory = ScannerViewModel.factory(DatabaseModule.repository)
+        factory = ScannerViewModel.factory(application, DatabaseModule.repository)
     )
     val shoppingViewModel: ShoppingViewModel = viewModel(
         factory = ShoppingViewModel.factory(DatabaseModule.shoppingRepository)
     )
-    val application = LocalContext.current.applicationContext as Application
     val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory(application))
     val savedProducts by viewModel.savedProducts.collectAsState()
     val foodItems = remember(savedProducts) {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val utcToday = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC")).apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }.timeInMillis
         savedProducts.map { entity ->
-            val daysLeft = ((entity.expiryDateMillis - System.currentTimeMillis()) / (1000L * 60 * 60 * 24)).toInt()
+            val daysLeft = ((entity.expiryDateMillis - utcToday) / (1000L * 60 * 60 * 24)).toInt()
             FoodItem(
                 id = entity.id.toInt(),
                 name = entity.name,
