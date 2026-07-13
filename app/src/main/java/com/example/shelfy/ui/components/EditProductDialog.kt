@@ -39,7 +39,11 @@ fun EditProductDialog(
     var quantity by remember { mutableStateOf(entity.quantity) }
     var selectedCategory by remember { mutableStateOf(entity.category) }
     var submitted by remember { mutableStateOf(false) }
-    val sdf = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    val sdf = remember {
+        SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        }
+    }
     var expiryDate by remember { mutableStateOf(sdf.format(Date(entity.expiryDateMillis))) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = entity.expiryDateMillis)

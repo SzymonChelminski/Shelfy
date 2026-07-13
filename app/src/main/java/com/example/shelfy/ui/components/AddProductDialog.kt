@@ -62,7 +62,9 @@ fun AddProductDialog(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }
                         expiryDate = sdf.format(Date(millis))
                     }
                     showDatePicker = false
