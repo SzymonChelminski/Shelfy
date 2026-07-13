@@ -38,7 +38,7 @@ fun ShelfyTopBar(onSettingsClick: () -> Unit = {}) {
                     painter = painterResource(id = R.drawable.shelfy_icon),
                     contentDescription = "Shelfy Logo",
                     modifier = Modifier
-                        .size(72.dp)
+                        .size(48.dp)
                 )
                 Text(
                     text = "Shelfy",
